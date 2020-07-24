@@ -1,11 +1,15 @@
 import os
-import pandas as pd
+import sys
 from frtmalign_2_msa import *
 
+if len(sys.argv) < 2:
+    raise SystemExit("syntax: %s <path to paths.txt>" % sys.argv[0])
+else:
+    paths_file = sys.argv[1].strip()
 # set working directory, output directories
 # identify files containing necessary information, including paths to program files (frtmalign, HOLE, pyali), information for each structure
 print('Info: Reading paths.txt.')
-paths = paths_dic()
+paths = paths_dic(paths_file)
 if not os.path.isfile(paths['structs_info']):
     raise SystemExit('Error: File for structure info ' + paths['structs_info'] + 'does not exist.')
 
