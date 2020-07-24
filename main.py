@@ -3,7 +3,7 @@ import sys
 from frtmalign_2_msa import *
 
 if len(sys.argv) < 2:
-    raise SystemExit("syntax: %s <path to paths.txt>" % sys.argv[0])
+    raise SystemExit("Usage: python %s <path to paths.txt>" % sys.argv[0])
 else:
     paths_file = sys.argv[1].strip()
 # set working directory, output directories
