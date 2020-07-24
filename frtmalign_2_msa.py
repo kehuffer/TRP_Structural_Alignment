@@ -256,19 +256,22 @@ def strip_tm_chains(wkdir,inputf,pdb_path,chains_data):
     
 def batch_frtmalign(in_file_path, out_dir, frtmalign_path, original_dir, clean_dir):
   arg_list = []
-  for station_file in glob.glob(in_file_path + "*.pdb"):
-    # for each file (stationary), run Fr-TM-Align against all other file names (mobile) and place into directory named for stationary protein
-    station_name = station_file[-14:-10]
-    out_file_path = "%sstationary_%s/" %(out_dir, station_name)
-    outfilename = out_file_path + station_name + ".pdb"
-    os.makedirs(os.path.dirname(outfilename), exist_ok=True)
-    for mobile_file in glob.glob(in_file_path + "*.pdb"):
-      mobile_name = mobile_file[-14:-10]
-      arg_list.append((mobile_file, station_file, out_file_path, mobile_name, station_name, frtmalign_path, original_dir, clean_dir))
-  # use parallel processing to speed up Fr-TM-Align batch alignment
-  n_cpus = mp.cpu_count()
-  pool = mp.Pool(n_cpus)
-  results = [pool.apply(single_frtmalign, args=arg_tup) for arg_tup in arg_list]
+  with tempfile.TemporaryDirectory() as tmpdirname:
+    shutil.copytree(in_file_path, tmpdirname)
+    for station_file in glob.glob(tmpdirname + "*.pdb"):
+      # for each file (stationary), run Fr-TM-Align against all other file names (mobile) and place into directory named for stationary protein
+      station_name = station_file[-14:-10]
+      out_file_path = "%sstationary_%s/" %(tmpdirname, station_name)
+      outfilename = out_file_path + station_name + ".pdb"
+      os.makedirs(os.path.dirname(outfilename), exist_ok=True)
+      for mobile_file in glob.glob(tmpdirname + "*.pdb"):
+        mobile_name = mobile_file[-14:-10]
+        arg_list.append((mobile_file, station_file, out_file_path, mobile_name, station_name, frtmalign_path, original_dir, clean_dir))
+    # use parallel processing to speed up Fr-TM-Align batch alignment
+    n_cpus = mp.cpu_count()
+    pool = mp.Pool(n_cpus)
+    results = [pool.apply(single_frtmalign, args=arg_tup) for arg_tup in arg_list]
+    shutil.copytree(tmpdirname, out_dir)
 
 def single_frtmalign(mobile_file, station_file, out_file_path, mobile_name, station_name, frtmalign_path, original_dir, clean_dir):
   print('m: %s, s: %s' %(mobile_name, station_name))
