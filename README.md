@@ -26,7 +26,9 @@ One reference structure for HOLE analysis, along with the xyz coordinates of a p
 
 ## Dependencies
 [pyali](https://github.com/christang/pyali)
+
 [HOLE](http://www.holeprogram.org/)
+
 [Fr-TM-Align](http://cssb.biology.gatech.edu/skolnick/files/FrTMalign/index.html)
 
 ---
@@ -101,17 +103,8 @@ Frequent changes to the OPM server may mean that this method of auto-downloading
 The HOLE program only accepts filenames with 70 or fewer characters.  We have used a method to automatically attempt to shorten long file names, which will output an error if it is unable to shorten the filename to a usable length.
 The HOLE program requires a radius file specifying the Van der Waals radius for each atom, and the included simple.rad file covers the atoms found in the TRP channel structures to date.  If structures in your analysis contain atoms not defined in the simple.rad file, HOLE will fail and the HOLE output text file will contain the name of the atom whose radius could not be defined.  To fix this, update the simple.rad file with the VdW radius of the atom.
 
-<details>
-<summary>YourTextHere</summary>
-blah blah blah
-</details>
 
-`code text`
-```
-formatted code text
-```
+## Authors
+Katherine Huffer
 
-## Authors and acknowledgment
-Katherine Huffer (katherine.huffer@nih.gov)
 Antoniya Aleksandrova
-Chris Tang
