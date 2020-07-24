@@ -31,6 +31,12 @@ One reference structure for HOLE analysis, along with the xyz coordinates of a p
 
 [Fr-TM-Align](http://cssb.biology.gatech.edu/skolnick/files/FrTMalign/index.html)
 
+[MDAnalysis](https://www.mdanalysis.org/)
+
+[scipy](https://www.scipy.org/)
+
+[seaborn](https://seaborn.pydata.org/#)
+
 ---
 
 ## Options and Customization
