@@ -13,6 +13,7 @@ import requests
 import seaborn as sns
 import shutil
 import subprocess
+import tempfile
 from Bio import AlignIO
 from Bio.PDB.DSSP import DSSP, dssp_dict_from_pdb_file
 from Bio.PDB.PDBParser import PDBParser
@@ -31,7 +32,7 @@ def paths_dic(locations='./paths.txt'):
     for line in f:
         if not line.startswith('#'):
             fields = line.split('\t')
-            if len(fields) == 2:
+            if len(fields) >= 2:
                 if fields[0].strip() == 'work_dir':
                     paths['work_dir'] = os.path.abspath(fields[1].strip()) + '/'
                 else:
@@ -40,7 +41,7 @@ def paths_dic(locations='./paths.txt'):
                 print('Info: Setting working directory to current directory, ' + os.getcwd() + '/. Change paths.txt for an alternative location.')
                 paths[fields[0].strip()] = os.getcwd() + '/'
             else:
-                raise SystemExit('Error: Path for ' + fields[0] + 'not set in paths.txt.')
+                raise SystemExit('Error: Path for ' + fields[0] + ' not set in paths.txt.')
     f.close()
 
     # establish project's subdirectory structure
@@ -257,7 +258,9 @@ def strip_tm_chains(wkdir,inputf,pdb_path,chains_data):
 def batch_frtmalign(in_file_path, out_dir, frtmalign_path, original_dir, clean_dir):
   arg_list = []
   with tempfile.TemporaryDirectory() as tmpdirname:
-    shutil.copytree(in_file_path, tmpdirname)
+    print(tmpdirname)
+    for pdb_file in glob.glob(in_file_path + "*pdb"):
+      
     for station_file in glob.glob(tmpdirname + "*.pdb"):
       # for each file (stationary), run Fr-TM-Align against all other file names (mobile) and place into directory named for stationary protein
       station_name = station_file[-14:-10]

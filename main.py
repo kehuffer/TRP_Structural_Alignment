@@ -11,7 +11,7 @@ else:
 print('Info: Reading paths.txt.')
 paths = paths_dic(paths_file)
 if not os.path.isfile(paths['structs_info']):
-    raise SystemExit('Error: File for structure info ' + paths['structs_info'] + 'does not exist.')
+    raise SystemExit('Error: File for structure info ' + paths['structs_info'] + ' does not exist.')
 
 # establish structures to include in the analysis, as well as chain order and residues to be kept when cleaning files
 # Note that paths['structs_info'] is an xml file containing information for each structure, including: pdbid, chain order, starting and ending residue numbers for transmembrane domain, and categories (subfamily, environment, method, and ligand)
