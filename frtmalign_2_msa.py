@@ -43,7 +43,9 @@ def paths_dic(locations='./paths.txt'):
             else:
                 raise SystemExit('Error: Path for ' + fields[0] + ' not set in paths.txt.')
     f.close()
-
+    
+    os.chdir(paths['work_dir'])
+    
     # establish project's subdirectory structure
     paths['pdb_dir'] = paths['work_dir'] + '1_original_structures_OPM/'
     paths['clean_dir'] = paths['work_dir'] + '2_clean_structures/'
@@ -259,22 +261,29 @@ def batch_frtmalign(in_file_path, out_dir, frtmalign_path, original_dir, clean_d
   arg_list = []
   with tempfile.TemporaryDirectory() as tmpdirname:
     print(tmpdirname)
+    tmpdirnamefull = tmpdirname+"/"
     for pdb_file in glob.glob(in_file_path + "*pdb"):
-      
-    for station_file in glob.glob(tmpdirname + "*.pdb"):
+      file_name = os.path.split(pdb_file)
+      shutil.copy2(pdb_file, tmpdirnamefull+file_name[1])
+    for station_file in glob.glob(tmpdirnamefull + "*.pdb"):
       # for each file (stationary), run Fr-TM-Align against all other file names (mobile) and place into directory named for stationary protein
       station_name = station_file[-14:-10]
-      out_file_path = "%sstationary_%s/" %(tmpdirname, station_name)
+      out_file_path = "%sstationary_%s/" %(tmpdirnamefull, station_name)
       outfilename = out_file_path + station_name + ".pdb"
       os.makedirs(os.path.dirname(outfilename), exist_ok=True)
-      for mobile_file in glob.glob(tmpdirname + "*.pdb"):
+      for mobile_file in glob.glob(tmpdirnamefull + "*.pdb"):
         mobile_name = mobile_file[-14:-10]
         arg_list.append((mobile_file, station_file, out_file_path, mobile_name, station_name, frtmalign_path, original_dir, clean_dir))
     # use parallel processing to speed up Fr-TM-Align batch alignment
     n_cpus = mp.cpu_count()
     pool = mp.Pool(n_cpus)
     results = [pool.apply(single_frtmalign, args=arg_tup) for arg_tup in arg_list]
-    shutil.copytree(tmpdirname, out_dir)
+    for root, dirs, files in os.walk(tmpdirname, topdown=False):
+      dir_name = os.path.split(root)[1]
+      if dir_name.startswith('stationary'):
+        os.mkdir(os.path.join(out_dir, dir_name))
+        for item in files:
+          shutil.copy2(os.path.join(root, item), os.path.join(out_dir, dir_name, item))
 
 def single_frtmalign(mobile_file, station_file, out_file_path, mobile_name, station_name, frtmalign_path, original_dir, clean_dir):
   print('m: %s, s: %s' %(mobile_name, station_name))
@@ -282,13 +291,14 @@ def single_frtmalign(mobile_file, station_file, out_file_path, mobile_name, stat
   bash_frtmalign = "%s %s %s -o %s%s_%s.sup -m 1" %(frtmalign_path, mobile_file, station_file, out_file_path, mobile_name, station_name)
   fileout = open("%s%s_%s.frtxt" %(out_file_path, mobile_name, station_name), "w+")
   print(bash_frtmalign.split())
+  print(os.getcwd())
   p = subprocess.Popen(bash_frtmalign.split(), stdout=fileout, stderr=fnull)
   p.wait()
   fileout.close()
   fnull.close()
   curr_dir = os.getcwd() + '/'
   if os.path.exists(curr_dir + 'trf.mat'): # for each mobile file, a transformation matrix will be created; rename the transform file and save for future use
-    os.rename(curr_dir + 'trf.mat', out_file_path + mobile_name + '_' + station_name + '.mat')
+    shutil.copy2(curr_dir + 'trf.mat', out_file_path + mobile_name + '_' + station_name + '.mat')
   else:
     raise SystemExit(curr_dir + 'trf.mat does not exist.')
     # apply the transformation matrix to the original structure and to the cleaned structure
@@ -853,7 +863,7 @@ def hole_annotation(msa_filename, radius_directory, norm_max_radius):
     max_radius_full = norm_max_radius
     print('For normalization of '+full_annot_filename+', the maximum radius has been set to '+str(norm_max_radius)+' \u00c5, as specified in paths.txt. The minimum radius has been set to 0 \u00c5.')
   else:
-    print('For normalization of, '+full_annot_filename+', the maximum radius is '+str(max_radius_nogap)+' \u00c5, which exceeds than the norm_max_radius of '+str(norm_max_radius)+' \u00c5 set in paths.txt. Adjust scale bars or edit norm_max_radius in paths.txt and run again. The minimum radius has been set to 0 \u00c5.')
+    print('For normalization of, '+full_annot_filename+', the maximum radius is '+str(max_radius_full)+' \u00c5, which exceeds than the norm_max_radius of '+str(norm_max_radius)+' \u00c5 set in paths.txt. Adjust scale bars or edit norm_max_radius in paths.txt and run again. The minimum radius has been set to 0 \u00c5.')
   full_radius_dict_norm = {}
   full_radius_dict_norm_match = {}
   align_df, template_id, msa_seq_dict = read_msa_file(msa_filename)
