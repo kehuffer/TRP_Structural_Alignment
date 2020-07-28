@@ -33,9 +33,11 @@ One reference structure for HOLE analysis, along with the xyz coordinates of a p
 
 [MDAnalysis](https://www.mdanalysis.org/)
 
-[scipy](https://www.scipy.org/)
+[SciPy](https://www.scipy.org/)
 
-[seaborn](https://seaborn.pydata.org/#)
+[Seaborn](https://seaborn.pydata.org/#)
+
+[DSSP, release 3.0.0 or later](https://github.com/cmbi/hssp)
 
 ---
 
