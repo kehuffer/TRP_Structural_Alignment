@@ -25,7 +25,7 @@ One reference structure for HOLE analysis, along with the xyz coordinates of a p
 ---
 
 ## Dependencies
-[pyali](https://github.com/christang/pyali)
+[pyali, release 3.5](https://github.com/christang/pyali)
 
 [HOLE](http://www.holeprogram.org/)
 
@@ -37,7 +37,7 @@ One reference structure for HOLE analysis, along with the xyz coordinates of a p
 
 [Seaborn](https://seaborn.pydata.org/#)
 
-[DSSP, release 3.0.0 or later](https://github.com/cmbi/hssp)
+[DSSP, release 3.0.0](https://github.com/cmbi/hssp)
 
 ---
 
