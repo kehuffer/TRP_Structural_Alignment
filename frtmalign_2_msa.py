@@ -1,3 +1,4 @@
+import argparse
 import errno
 import glob
 import itertools
@@ -13,14 +14,18 @@ import requests
 import seaborn as sns
 import shutil
 import subprocess
+import sys
 import tempfile
 from Bio import AlignIO
 from Bio.PDB.DSSP import DSSP, dssp_dict_from_pdb_file
 from Bio.PDB.PDBParser import PDBParser
 from Bio.Seq import Seq
 from MDAnalysis.analysis.hole import HOLE
-from pyali.mrgali import *
 from scipy.cluster.hierarchy import dendrogram, linkage, leaves_list
+try:
+  from pyali.mrgali import *
+except:
+  print("[ERROR]: pyali has not been installed.  To install, run `python setup.py install` from project directory.")
 
 #import subprocess
 #from unittest import mock
@@ -43,8 +48,13 @@ def paths_dic(locations='./paths.txt'):
             else:
                 raise SystemExit('Error: Path for ' + fields[0] + ' not set in paths.txt.')
     f.close()
-    
-    os.chdir(paths['work_dir'])
+    try:
+        os.mkdir(paths['work_dir'])
+    except OSError as exc:
+        if exc.errno != errno.EEXIST:
+            raise
+        else:
+            os.chdir(paths['work_dir'])
     
     # establish project's subdirectory structure
     paths['pdb_dir'] = paths['work_dir'] + '1_original_structures_OPM/'
@@ -70,6 +80,15 @@ def paths_dic(locations='./paths.txt'):
         if exc.errno != errno.EEXIST:
             raise
         pass
+
+    if not os.path.exists(paths['structs_info']):
+        raise SystemExit(paths['structs_info']+' path to .xml file specified in paths.txt does not exist')
+    if not os.path.exists(paths['frtmalign']):
+        raise SystemExit(paths['frtmalign']+' path to Fr-TM-Align executable specified in paths.txt does not exist')
+    if not os.path.exists(paths['hole']):
+        raise SystemExit(paths['hole']+' path to HOLE executable specified in paths.txt does not exist')
+    if not os.path.exists(paths['vdw_radius_file']):
+        raise SystemExit(paths['vdw_radius_file']+' path to Van der Waals radius file specified in paths.txt does not exist')
 
     #print(paths)
     return paths
@@ -260,7 +279,7 @@ def strip_tm_chains(wkdir,inputf,pdb_path,chains_data):
 def batch_frtmalign(in_file_path, out_dir, frtmalign_path, original_dir, clean_dir):
   arg_list = []
   with tempfile.TemporaryDirectory() as tmpdirname:
-    print(tmpdirname)
+    #print(tmpdirname)
     tmpdirnamefull = tmpdirname+"/"
     for pdb_file in glob.glob(in_file_path + "*pdb"):
       file_name = os.path.split(pdb_file)
@@ -281,7 +300,12 @@ def batch_frtmalign(in_file_path, out_dir, frtmalign_path, original_dir, clean_d
     for root, dirs, files in os.walk(tmpdirname, topdown=False):
       dir_name = os.path.split(root)[1]
       if dir_name.startswith('stationary'):
-        os.mkdir(os.path.join(out_dir, dir_name))
+        try:
+          os.mkdir(os.path.join(out_dir, dir_name))
+        except OSError as exc:
+          if exc.errno != errno.EEXIST:
+            raise
+          pass
         for item in files:
           shutil.copy2(os.path.join(root, item), os.path.join(out_dir, dir_name, item))
 
@@ -290,8 +314,8 @@ def single_frtmalign(mobile_file, station_file, out_file_path, mobile_name, stat
   fnull = open(os.devnull, 'w')
   bash_frtmalign = "%s %s %s -o %s%s_%s.sup -m 1" %(frtmalign_path, mobile_file, station_file, out_file_path, mobile_name, station_name)
   fileout = open("%s%s_%s.frtxt" %(out_file_path, mobile_name, station_name), "w+")
-  print(bash_frtmalign.split())
-  print(os.getcwd())
+  #print(bash_frtmalign.split())
+  #print(os.getcwd())
   p = subprocess.Popen(bash_frtmalign.split(), stdout=fileout, stderr=fnull)
   p.wait()
   fileout.close()
@@ -518,72 +542,75 @@ def raise_seq(infile, outfile, seqn):
   out.close()
 
 def align_merger(file_list, outname, width, reference_seq):
-  refs,alis,alis_names = [],[],[]
-  for f in file_list:
-    if reference_seq !='':
-      # print(reference_seq)
-      raise_seq(f, f + '.tmp', reference_seq)
-      alignment = open(f + '.tmp','r')
-    else:
-      alignment = open(f, 'r')
-    flag=0
-    sequence1=""
-    sequence2=""
-    for line in alignment:
-      if line.startswith(">") and flag==1:
-        flag=2
-        name2 = line.strip()
-      if line.startswith(">") and flag==0:
-        flag=1
-        name1 = line.strip()
-      if not line.startswith(">") and flag==1:
-        sequence1=sequence1+line.strip()
-      if not line.startswith(">") and flag==2:
-        sequence2=sequence2+line.strip()
-    alignment.close()
-    if reference_seq != '':
-      os.remove(f + '.tmp')
-    alis.append([sequence1, sequence2])
-    alis_names.append(name2)
-    # print(f)
-    # print(name1)
-    # print(sequence1)
-    # print(name2)
-    # print(sequence2)
-    # print(refs)
-    # print(alis)
-    # print(alis_names)
+    refs, alis, alis_names = [], [], []
+    for f in file_list:
+        if reference_seq != '':
+            raise_seq(f, f + '.tmp', reference_seq)
+            alignment = open(f + '.tmp', 'r')
+        else:
+            alignment = open(f, 'r')
+        flag = 0
+        sequence1 = ""
+        sequence2 = ""
+        alis_element = []
+        for line in alignment:
+            if line.startswith(">") and flag == 2:
+                alis_element.append(sequence2)
+                alis_names.append(name2)
+                sequence2 = ""
+                name2 = line.strip()
+            if line.startswith(">") and flag == 1:
+                flag = 2
+                alis_element.append(sequence1)
+                name2 = line.strip()
+            if line.startswith(">") and flag == 0:
+                flag = 1
+                name1 = line.strip()
+            if not line.startswith(">") and flag == 1:
+                sequence1 = sequence1 + line.strip().upper()
+            if not line.startswith(">") and flag == 2:
+                sequence2 = sequence2 + line.strip().upper()
+        alignment.close()
+        if reference_seq != '':
+            os.remove(f + '.tmp')
+        alis_element.append(sequence2)
+        alis.append(alis_element)
+        alis_names.append(name2)
 
-  sequence = [s for s in sequence1 if s!='-']
-  sequence = ''.join(sequence)
-  for i in range(len(alis)):
-    refs.append(sequence)
+    refs = [''.join([s for s in seqs[0] if s != '-']) for seqs in alis]
+    if refs.count(refs[0]) != len(refs):
+        print("The reference sequences in all the provided alignments are not identical.")
+        for i, r in enumerate(refs[1:]):
+            for j, s in enumerate(refs[0]):
+                if s!=refs[i+1][j]:
+                    print(file_list[0] +": (" + str(j) + "," + s + "), " + file_list[i+1] + ": " + r[j])
+        raise SystemExit("References need to be the same to proceed.")
 
-  a = Alignment.from_reference(refs)
-  for i in range(len(alis)):
-    a.merge(i, alis[i])
-  
-  flds = str(a).split('\n')
+    a = Alignment.from_reference(refs)
+    for i in range(len(alis)):
+        a.merge(i, alis[i])
 
-  aligned_list = []
-  out = open(outname,'w')
-  for i, ln in enumerate(flds):
-    if i==0:
-      s=ln[ln.index(':')+2:]
-      out.write(name1 + '\n')
-      aligned_list.append((name1, s))
-      while len(s)>0:
-        out.write(s[:width]+'\n')
-        s=s[width:]
-    if i>=len(refs):
-      s=ln[ln.index(':')+2:]
-      out.write(alis_names[i-len(refs)] + '\n')
-      aligned_list.append((alis_names[i-len(refs)], s))
-      while len(s)>0:
-        out.write(s[:width]+'\n')
-        s=s[width:]
-  out.close()
-  return aligned_list
+    flds = str(a).split('\n')
+
+    aligned_list = []
+    out = open(outname, 'w')
+    for i, ln in enumerate(flds):
+        if i == 0:
+            s = ln[ln.index(':') + 2:]
+            out.write(name1 + '\n')
+            aligned_list.append((name1, s))
+            while len(s) > 0:
+                out.write(s[:width] + '\n')
+                s = s[width:]
+        if i >= len(refs):
+            s = ln[ln.index(':') + 2:]
+            out.write(alis_names[i - len(refs)] + '\n')
+            aligned_list.append((alis_names[i - len(refs)], s))
+            while len(s) > 0:
+                out.write(s[:width] + '\n')
+                s = s[width:]
+    out.close()
+    return aligned_list
     
 def batch_align_merger(input_directory, order_file):  # input_directory is parent dictionary containing directories for each stationary structure
   order_list = pd.read_csv(order_file, header=0, usecols=['PDB ID']) # can change order of sequences by using a different csv file
@@ -736,7 +763,7 @@ def single_hole(filename, short_filename, pdb_id, out_dir, hole_path, input_df, 
         residue3 = structure[0][chain3][residue1.get_full_id()[3]]
         residue4 = structure[0][chain4][residue1.get_full_id()[3]]
       except:
-        print("for "+filename+", "+residue1.get_resname()+" does not exist in other chain(s)")
+        #print("for "+filename+", "+residue1.get_resname()+" does not exist in other chain(s)")
         residue_level_radius[residue1.get_full_id()]  = [residue1.get_resname(), 'NaN']
         continue
 
@@ -752,7 +779,7 @@ def single_hole(filename, short_filename, pdb_id, out_dir, hole_path, input_df, 
             atom3 = structure[0][chain3][residue1.get_full_id()[3]][atom1.get_name()]
             atom4 = structure[0][chain4][residue1.get_full_id()[3]][atom1.get_name()]
           except:
-            print("for "+filename+", "+residue1.get_resname()+" "+atom1.get_name()+" does not exist in other chain(s)")
+            #print("for "+filename+", "+residue1.get_resname()+" "+atom1.get_name()+" does not exist in other chain(s)")
             continue
           coord1 = atom1.get_coord()
           coord2 = atom2.get_coord()
@@ -808,7 +835,7 @@ def single_hole(filename, short_filename, pdb_id, out_dir, hole_path, input_df, 
           #print(residue1.get_resname(), pore_level.radius.min())
           
       else:
-        print("for "+filename+", "+residue1.get_resname()+" does not match residue(s) in other chain(s)")
+        #print("for "+filename+", "+residue1.get_resname()+" does not match residue(s) in other chain(s)")
         residue_level_radius[residue1.get_full_id()] = [residue1.get_resname(), 'NaN']
 
     residue_level_radius_df = pd.DataFrame.from_dict(residue_level_radius, orient='index', columns=['residue', 'radius'])
