@@ -1,5 +1,5 @@
 # Structural Alignment
-"Global alignment and assessment of TRP channel transmembrane domain structures to explore functional mechanisms." eLife 2020
+Huffer, K.E., Aleksandrova, A.A., Jara-Oseguera, A., Forrest, L.R., & K.J. Swartz (2020). Global alignment and assessment of TRP channel transmembrane domain structures to explore functional mechanisms. eLife. 
 
 ## Requirements
 Requires .xml file containing the following information for each structure:
