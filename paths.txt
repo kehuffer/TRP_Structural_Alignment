@@ -4,7 +4,7 @@ structs_info	/home/TRP-channels/Run1/struct_info191031.xml
 frtmalign	/home/software/frtmalign/frtmalign.exe
 hole	/home/hole/2.2.005/exe/hole
 provided_struct	/home/TRP-channels/0_provided_structures/	
-hole_reference_struct	2r9r
+hole_reference_struct	6co7
 hole_reference_pore_point	[0.001, 0.004, 6.843] # xyz coordinates of a point in the pore of the hole_reference_struct
 vdw_radius_file	simple2.rad
 norm_max_radius	15
