@@ -107,9 +107,12 @@ To color the multiple sequence alignment by radius:
 ## Limitations
 
 Fr-TM-Align is limited to 3000 total residues
+
 Frequent changes to the OPM server may mean that this method of auto-downloading from OPM will become obsolete. If this happens, you may manually download and save structures into a provided_struct directory that you specify in paths.txt.  Alternatively, the code will attempt to aquire the structures from the PDB.
+
 The HOLE program only accepts filenames with 70 or fewer characters.  We have used a method to automatically attempt to shorten long file names, which will output an error if it is unable to shorten the filename to a usable length.
-The HOLE program requires a radius file specifying the Van der Waals radius for each atom, and the included simple.rad file covers the atoms found in the TRP channel structures to date.  If structures in your analysis contain atoms not defined in the simple.rad file, HOLE will fail and the HOLE output text file will contain the name of the atom whose radius could not be defined.  To fix this, update the simple.rad file with the VdW radius of the atom.
+
+The HOLE program requires a radius file specifying the Van der Waals radius for each atom, and the included simple2.rad file covers the atoms found in the TRP channel structures to date.  If structures in your analysis contain atoms not defined in the simple2.rad file, HOLE will fail and the HOLE output text file will contain the name of the atom whose radius could not be defined.  To fix this, update the simple2.rad file with the VdW radius of the atom.
 
 
 ## Authors
