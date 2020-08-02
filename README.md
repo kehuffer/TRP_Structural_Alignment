@@ -1,6 +1,6 @@
 # Structural Alignment of TRP Channels
 In this project, we superimpose available structures of members of the 
-TRP Channel family based on their transmembrane domains and analyze 
+TRP channel family based on their transmembrane domains and analyze 
 the resulting alignment to understand functional mechanisms.
 
 For a full description and to cite this work, please see:
