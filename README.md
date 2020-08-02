@@ -1,5 +1,11 @@
-# Structural Alignment
-Huffer, K.E., Aleksandrova, A.A., Jara-Oseguera, A., Forrest, L.R., & K.J. Swartz (2020). Global alignment and assessment of TRP channel transmembrane domain structures to explore functional mechanisms. eLife. 
+# Structural Alignment of TRP Channels
+In this project, we superimpose available structures of members of the 
+TRP Channel family based on their transmembrane domains and analyze 
+the resulting alignment to understand functional mechanisms.
+
+For a full description and to cite this work, please see:
+
+>Huffer, K.E., Aleksandrova, A.A., Jara-Oseguera, A., Forrest, L.R., & K.J. Swartz (2020). Global alignment and assessment of TRP channel transmembrane domain structures to explore functional mechanisms. eLife. 
 
 ## Requirements
 Requires .xml file containing the following information for each structure:
@@ -16,7 +22,7 @@ Requires paths.txt file specifying locations of important directories and progra
 - structs_info: the path to the required .xml file containing information about each structure
 - frtmalign: the path to the frtmalign.exe executable
 - hole: the path to the hole executable
-- provided_struct: path to directory containing any pdbid.pdb files that are not found in OPM (see below)
+- provided_struct: path to directory containing any \<pdbid>.pdb files that are not found in OPM (see below)
 
 Van der Waals radius file for HOLE, simple.rad
 
@@ -25,11 +31,16 @@ One reference structure for HOLE analysis, along with the xyz coordinates of a p
 ---
 
 ## Dependencies
-[pyali, release 3.5](https://github.com/christang/pyali)
-
+#### External programs
 [HOLE](http://www.holeprogram.org/)
 
 [Fr-TM-Align](http://cssb.biology.gatech.edu/skolnick/files/FrTMalign/index.html)
+
+[DSSP 3.1.4](https://github.com/cmbi/dssp)
+
+#### Python packages
+
+[pyali 0.1.1](https://github.com/christang/pyali)
 
 [MDAnalysis](https://www.mdanalysis.org/)
 
@@ -37,7 +48,7 @@ One reference structure for HOLE analysis, along with the xyz coordinates of a p
 
 [Seaborn](https://seaborn.pydata.org/#)
 
-[DSSP, release 3.0.0](https://github.com/cmbi/hssp)
+[Biopython](https://biopython.org/)
 
 ---
 
@@ -88,15 +99,24 @@ Parent analysis folder
 ---
 
 ## Using and Visualizing the Outputs
-Use PyMOL to open the sphpdb.pdb file containing spheres representing the pore determined with HOLE, and use the commands below to set the Van der Waals radius of each sphere equal to the pore radius value stored as the B-factor, then update the display to visualize the new sphere sizes:
+Use PyMOL to open the sphpdb.pdb file containing spheres representing 
+the pore determined with HOLE, and use the commands below to set the 
+Van der Waals radius of each sphere equal to the pore radius value 
+stored as the B-factor, then update the display to visualize the new 
+sphere sizes:
 ```
 alter sphpdb_name, vdw=b
 rebuild
 ```
 
-Multiple sequence alignments may be viewed with your choice of alignment program that accepts FASTA files (we used Jalview).  
+Multiple sequence alignments may be viewed with your choice of alignment 
+program that accepts FASTA files (we used [Jalview](https://www.jalview.org/)).  
 
-To visualize the multiple sequence alignment with pore-contributing residues colored according to radius, use Jalview to open the multiple sequence alignment (pdbid_full.ali or pdbid_nogap.ali) and the corresponding annotations file (pdbid_full_annot.jlv or pdbid_nogap_annot.jlv) in the same project. 
+To visualize the multiple sequence alignment with pore-contributing 
+residues colored according to radius, use Jalview to open the multiple 
+sequence alignment (pdbid_full.ali or pdbid_nogap.ali) and the 
+corresponding annotations file (pdbid_full_annot.jlv or pdbid_nogap_annot.jlv) 
+in the same project. 
 To color the multiple sequence alignment by radius:
 - Colour > By Annotation
 - In the dialog box, select the tick-box next to "Per-sequence only," and select "radius" in the top dropdown menu. From there, you can customize the colors and thresholds.
@@ -108,11 +128,24 @@ To color the multiple sequence alignment by radius:
 
 Fr-TM-Align is limited to 3000 total residues
 
-Frequent changes to the OPM server may mean that this method of auto-downloading from OPM will become obsolete. If this happens, you may manually download and save structures into a provided_struct directory that you specify in paths.txt.  Alternatively, the code will attempt to aquire the structures from the PDB.
+Frequent changes to the OPM server may mean that this method of auto-downloading 
+from OPM will become obsolete. If this happens, you may manually download 
+and save structures into a provided_struct directory that you specify in 
+paths.txt.  Alternatively, the code will attempt to aquire the structures 
+from the PDB.
 
-The HOLE program only accepts filenames with 70 or fewer characters.  We have used a method to automatically attempt to shorten long file names, which will output an error if it is unable to shorten the filename to a usable length.
+The HOLE program only accepts filenames with 70 or fewer characters. 
+We have used a method to automatically attempt to shorten long file names, 
+which will output an error if it is unable to shorten the filename to a 
+usable length.
 
-The HOLE program requires a radius file specifying the Van der Waals radius for each atom, and the included simple2.rad file covers the atoms found in the TRP channel structures to date.  If structures in your analysis contain atoms not defined in the simple2.rad file, HOLE will fail and the HOLE output text file will contain the name of the atom whose radius could not be defined.  To fix this, update the simple2.rad file with the VdW radius of the atom.
+The HOLE program requires a radius file specifying the Van der Waals 
+radius for each atom, and the included simple2.rad file covers the atoms 
+found in the TRP channel structures to date. 
+If structures in your analysis contain atoms not defined in the 
+simple2.rad file, HOLE will fail and the HOLE output text file will 
+contain the name of the atom whose radius could not be defined. 
+To fix this, update the simple2.rad file with the VdW radius of the atom.
 
 
 ## Authors
