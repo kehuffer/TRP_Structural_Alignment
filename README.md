@@ -96,6 +96,8 @@ Parent analysis folder
 - DSSP information outputted into pseudo-FASTA format that matches the multiple sequence alignment (filenames: stationary_full_dssp.fa, stationary_nogap_dssp.fa)
 - For the hole_reference_struct specified in paths.txt, the MSA, radius, and dssp information is also saved in .csv files (filenames: stationary_full_msa.csv, stationary_full_radius.csv, stationary_full_dssp.csv, stationary_nogap_msa.csv, stationary_nogap_radius.csv, stationary_nogap_dssp.csv)
 
+Some outputs of this analysis are available on Zenodo, doi: [10.5281/zenodo.3972100](https://zenodo.org/record3972100)
+
 ---
 
 ## Using and Visualizing the Outputs
