@@ -5,7 +5,7 @@ the resulting alignment to understand functional mechanisms.
 
 For a full description and to cite this work, please see:
 
->Huffer, K.E., Aleksandrova, A.A., Jara-Oseguera, A., Forrest, L.R., & K.J. Swartz (2020). Global alignment and assessment of TRP channel transmembrane domain structures to explore functional mechanisms. eLife. 
+>Huffer, K.E., Aleksandrova, A.A., Jara-Oseguera, A., Forrest, L.R., & K.J. Swartz (2020). Global alignment and assessment of TRP channel transmembrane domain structures to explore functional mechanisms. eLife. [http://doi.org/10.7554/eLife.58660](http://doi.org/10.7554/eLife.58660)
 
 ## Requirements
 Requires .xml file containing the following information for each structure:
